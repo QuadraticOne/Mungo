@@ -4,16 +4,17 @@ class Dataset {
      * @param {string} name 
      * @param {Dataset} parent
      * @param {[Dataset]} children 
-     * @param {[Dataset]} predecessors the datasets on which this dataset depends
-     * @param {[Dataset]} successors the datasets that depend on this dataset
      */
-    constructor(name, parent, children, predecessors, successors) {
+    constructor(name, parent, children) {
         this.name = name;
+
         this.parent = null;
         this.setParent(parent);
+        
         this.children = children;
-        this.predecessors = predecessors;
-        this.successors = successors;
+
+        this.predecessors = [];
+        this.successors = [];
     }
 
     /**
