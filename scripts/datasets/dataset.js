@@ -23,10 +23,10 @@ class Dataset {
      * children beneath it.
      */
     generation() {
-        if (this.parent === null) {
+        if (parent === null) {
             return 0;
         } else {
-            return 1 + this.parent.generation();
+            return 1 + parent.generation();
         }
     }
 
@@ -36,12 +36,12 @@ class Dataset {
      * error if this dataset has no parent.
      */
     removeParent() {
-        if (this.parent !== null) {
-            var i = this.parent.children.indexOf(this);
+        if (parent !== null) {
+            var i = parent.children.indexOf(this);
             if (i !== -1) {
-                this.parent.children.splice(i, 1);
+                parent.children.splice(i, 1);
             }
-            this.parent = null;
+            parent = null;
         }
     }
 
@@ -52,8 +52,8 @@ class Dataset {
      */
     setParent(dataset) {
         if (dataset !== null) {
-            this.parent = dataset;
-            this.parent.children.push(this);
+            parent = dataset;
+            parent.children.push(this);
         }
     }
 
@@ -64,7 +64,7 @@ class Dataset {
      */
     getItem(index) {
         console.error("Dataset.getItem not implemented.");
-    };
+    }
 
     /**
      * Count the items that are direct descendents of this dataset,
@@ -72,19 +72,47 @@ class Dataset {
      */
     countDirectItems() {
         console.error("Dataset.countItems not implemented.");
-    };
+    }
+
+    /**
+     * Called when any of the predecessor datasets are updated; define
+     * in this function how this dataset should react to the change.
+     * @param {Dataset} predecessor 
+     */
+    predecessorUpdated(predecessor) {
+        console.error("Dataset.predecessorUpdated not implemented.");
+    }
+
+    /**
+     * Perform any internal updates necessary when this dataset changes.
+     */
+    selfUpdated() {
+        console.error("Dataset.selfUpdated not implemented.");
+    }
+
+    /**
+     * Called to make any internal changes needed when the dataset is
+     * updated, and notifies any successors that they may also need to
+     * be updated.
+     */
+    updated() {
+        selfUpdated();
+        for (var i = 0; i < successors.length; i++) {
+            this.successors[i].predecessorUpdated(this);
+        }
+    }
 
     /**
      * Return the number of items belonging to this dataset and its
      * children.
      */
     countItems() {
-        var total = this.countDirectItems();
-        for (var i = 0; i < this.children.length; i++) {
-            total += this.children[i].countItems();
+        var total = countDirectItems();
+        for (var i = 0; i < children.length; i++) {
+            total += children[i].countItems();
         }
         return total;
-    };
+    }
 
     /**
      * Return all items belonging directly to the dataset and, optionally,
@@ -93,12 +121,12 @@ class Dataset {
      */
     getItems(includeChildren) {
         var output = [];
-        for (var i = 0; i < this.countDirectItems(); i++) {
-            output.push(this.getItem(i));
+        for (var i = 0; i < countDirectItems(); i++) {
+            output.push(getItem(i));
         }
         if (includeChildren) {
-            for (var i = 0; i < this.children.length; i++) {
-                output = output.concat(this.children[i].items(includeChildren));
+            for (var i = 0; i < children.length; i++) {
+                output = output.concat(children[i].items(includeChildren));
             }
         } 
         return output;
@@ -109,7 +137,7 @@ class Dataset {
      * @param {Dataset} dataset
      */
     addPredecessor(dataset) {
-        this.predecessors.push(dataset);
+        predecessors.push(dataset);
     }
 
     /**
@@ -118,7 +146,7 @@ class Dataset {
      * @param {Dataset} dataset
      */
     addSuccessor(dataset) {
-        this.successors.push(dataset);
+        successors.push(dataset);
     }
 
     /**
@@ -126,9 +154,9 @@ class Dataset {
      * @param {Dataset} dataset
      */
     removePredecessor(dataset) {
-        var i = this.predecessors.indexOf(dataset);
+        var i = predecessors.indexOf(dataset);
         if (i !== -1) {
-            this.predecessors.splice(i, 1);
+            predecessors.splice(i, 1);
         } else {
             console.error("Predecessor not found.");
         }
@@ -140,9 +168,9 @@ class Dataset {
      * @param {Dataset} dataset
      */
     addSuccessor(dataset) {
-        var i = this.successors.indexOf(dataset);
+        var i = successors.indexOf(dataset);
         if (i !== -1) {
-            this.successors.splice(i, 1);
+            successors.splice(i, 1);
         } else {
             console.error("Successor not found.");
         }
