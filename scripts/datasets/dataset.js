@@ -23,10 +23,10 @@ class Dataset {
      * children beneath it.
      */
     generation() {
-        if (parent === null) {
+        if (this.parent === null) {
             return 0;
         } else {
-            return 1 + parent.generation();
+            return 1 + this.parent.generation();
         }
     }
 
@@ -37,11 +37,11 @@ class Dataset {
      */
     removeParent() {
         if (parent !== null) {
-            var i = parent.children.indexOf(this);
+            var i = this.parent.children.indexOf(this);
             if (i !== -1) {
-                parent.children.splice(i, 1);
+                this.parent.children.splice(i, 1);
             }
-            parent = null;
+            this.parent = null;
         }
     }
 
@@ -52,8 +52,8 @@ class Dataset {
      */
     setParent(dataset) {
         if (dataset !== null) {
-            parent = dataset;
-            parent.children.push(this);
+            this.parent = dataset;
+            this.parent.children.push(this);
         }
     }
 
@@ -96,8 +96,8 @@ class Dataset {
      * be updated.
      */
     updated() {
-        selfUpdated();
-        for (var i = 0; i < successors.length; i++) {
+        this.selfUpdated();
+        for (var i = 0; i < this.successors.length; i++) {
             this.successors[i].predecessorUpdated(this);
         }
     }
@@ -108,8 +108,8 @@ class Dataset {
      */
     countItems() {
         var total = countDirectItems();
-        for (var i = 0; i < children.length; i++) {
-            total += children[i].countItems();
+        for (var i = 0; i < this.children.length; i++) {
+            total += this.children[i].countItems();
         }
         return total;
     }
@@ -121,12 +121,12 @@ class Dataset {
      */
     getItems(includeChildren) {
         var output = [];
-        for (var i = 0; i < countDirectItems(); i++) {
-            output.push(getItem(i));
+        for (var i = 0; i < this.countDirectItems(); i++) {
+            output.push(this.getItem(i));
         }
         if (includeChildren) {
-            for (var i = 0; i < children.length; i++) {
-                output = output.concat(children[i].items(includeChildren));
+            for (var i = 0; i < this.children.length; i++) {
+                output = output.concat(this.children[i].items(includeChildren));
             }
         } 
         return output;
@@ -137,7 +137,7 @@ class Dataset {
      * @param {Dataset} dataset
      */
     addPredecessor(dataset) {
-        predecessors.push(dataset);
+        this.predecessors.push(dataset);
     }
 
     /**
@@ -146,7 +146,7 @@ class Dataset {
      * @param {Dataset} dataset
      */
     addSuccessor(dataset) {
-        successors.push(dataset);
+        this.successors.push(dataset);
     }
 
     /**
@@ -154,9 +154,9 @@ class Dataset {
      * @param {Dataset} dataset
      */
     removePredecessor(dataset) {
-        var i = predecessors.indexOf(dataset);
+        var i = this.predecessors.indexOf(dataset);
         if (i !== -1) {
-            predecessors.splice(i, 1);
+            this.predecessors.splice(i, 1);
         } else {
             console.error("Predecessor not found.");
         }
@@ -167,10 +167,10 @@ class Dataset {
      * dataset.
      * @param {Dataset} dataset
      */
-    addSuccessor(dataset) {
-        var i = successors.indexOf(dataset);
+    removeSuccessor(dataset) {
+        var i = this.successors.indexOf(dataset);
         if (i !== -1) {
-            successors.splice(i, 1);
+            this.successors.splice(i, 1);
         } else {
             console.error("Successor not found.");
         }

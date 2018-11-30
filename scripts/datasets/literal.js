@@ -18,7 +18,7 @@ class LiteralDataset extends Dataset {
      * @param {int} index 
      */
     getItem(index) {
-        return items[index];
+        return this.items[index];
     }
 
     /**
@@ -26,7 +26,7 @@ class LiteralDataset extends Dataset {
      * not counting any that belong to its children.
      */
     countDirectItems() {
-        return items.length;
+        return this.items.length;
     }
 
     /**
