@@ -1,0 +1,12 @@
+{
+    "name": "Mungo",
+    "description": "Provides a UI for quickly and easily performing data munging and visualisation.",
+    "version": "0.1",
+    "manifest_version": 1,
+    "app": {
+      "background": {
+        "scripts": ["background.js"]
+      }
+    },
+    "icons": { "16": "placeholder-16.png", "128": "placeholder-128.png" }
+  }
