@@ -10,7 +10,7 @@ class Dataset {
 
         this.parent = null;
         this.setParent(parent);
-        
+
         this.children = children;
 
         this.predecessors = [];
@@ -146,5 +146,27 @@ class Dataset {
         } else {
             console.error("Successor not found.");
         }
+    }
+
+    /**
+     * Create a directional dependency between one dataset and
+     * another.
+     * @param {Dataset} predecessor 
+     * @param {Dataset} successor 
+     */
+    static createDependency(predecessor, successor) {
+        predecessor.addSuccessor(successor);
+        successor.addPredecessor(predecessor);
+    }
+
+    /**
+     * Remove an existing directed dependency between one
+     * dataset and another.
+     * @param {Dataset} predecessor 
+     * @param {Dataset} successor 
+     */
+    static removeDependency(predecessor, successor) {
+        predecessor.removeSuccessor(successor);
+        successor.removePredecessor(predecessor);
     }
 }
