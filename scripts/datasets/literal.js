@@ -29,10 +29,3 @@ class LiteralDataset extends Dataset {
         return this.items.length;
     };
 }
-
-points = [];
-for (var i = 0; i < 20; i++) {
-    points.push({ x: i, y: i * i });
-}
-d = new LiteralDataset("d", null, [], points);
-e = new LiteralDataset("e", d, [], points);
