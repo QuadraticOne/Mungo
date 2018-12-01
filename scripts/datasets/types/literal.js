@@ -19,7 +19,8 @@ class LiteralDataset extends Dataset {
      * @param {function} callback
      */
     getItem(index, callback) {
-        callback(this.items[index]);
+        var self = this;
+        callback(self.items[index]);
     }
 
     /**
@@ -28,7 +29,8 @@ class LiteralDataset extends Dataset {
      * @param {function} callback
      */
     countDirectItems(callback) {
-        callback(this.items.length);
+        var self = this;
+        callback(self.items.length);
     }
 
     /**

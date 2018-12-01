@@ -1,6 +1,7 @@
-new MessageAPISlave(new SandboxFunction().response);
+var sandboxedFunction = null;
+var sandboxedFunctionSlave = null;
 
-class SandboxFunction {
+class SandboxedFunction {
     /**
      * Class which maintains a list of functions, each referenced
      * by a GUID, allowing them to be dynamically updated and queried.
@@ -46,7 +47,7 @@ class SandboxFunction {
      * @param {string} guid 
      * @param {[object]} data 
      */
-    queryMany(guid, data) {
+    massQuery(guid, data) {
         return data.map(this.functions[guid]);
     }
 
@@ -67,8 +68,8 @@ class SandboxFunction {
                 var result = this.query(data.guid, data.datum);
                 result.success = true;
                 return result;
-            case "queryMany":
-                var result = this.queryMany(data.guid, data.data);
+            case "massQuery":
+                var result = this.massQuery(data.guid, data.data);
                 result.success = true;
                 return result;
             default:
@@ -77,3 +78,6 @@ class SandboxFunction {
         }
     }
 }
+
+sandboxedFunction = new SandboxedFunction();
+sandboxedFunctionSlave = new MessageAPISlave(sandboxedFunction.response);

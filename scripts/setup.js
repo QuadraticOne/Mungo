@@ -11,8 +11,8 @@ function addClickMethod(elementId, callback) {
 }
 
 function setupSandboxedFunctionMessenger() {
-    sandboxedFunctionMessenger = new MessengerAPIMaster(
-        "sandboxedFunctionMaster", "../pages/sandboxfunction.html");
+    sandboxedFunctionMessenger = new MessageAPIMaster(
+        "sandboxedFunctionMaster", "../pages/sandboxedfunction.html");
     sandboxedFunctionMessenger.start();
 }
 

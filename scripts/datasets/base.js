@@ -112,7 +112,7 @@ class Dataset {
      */
     countItems(callback) {
         var self = this;
-        getters = range(this.children.length).map(
+        getters = range(self.children.length).map(
             cb => (i => self.children[i].countItems(cb)));
         getters.push(cb => self.countDirectItems(cb));
         new CallbackAccumulator(getters).execute(function(counts) {
