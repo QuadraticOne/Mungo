@@ -70,6 +70,6 @@ class MappedDataset extends Dataset {
      */
     setFunctionString(newString) {
         this.functionString = newString;
-        this.transfer = new Function("d", this.functionString);
+        this.transfer = new Function("x", this.functionString);
     }
 }

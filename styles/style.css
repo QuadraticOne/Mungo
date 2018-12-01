@@ -1,3 +1,7 @@
 .pageBackground {
     background-color: #225363;
 }
+
+#sandbox {
+    display: none;
+}
