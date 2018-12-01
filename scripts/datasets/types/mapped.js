@@ -6,34 +6,44 @@ class MappedDataset extends Dataset {
      * @param {Dataset} parent 
      * @param {[Dataset]} children 
      * @param {Dataset} source 
-     * @param {string} functionString 
+     * @param {string} parameterName
+     * @param {string} functionBody 
      */
-    constructor(name, parent, children, source, functionString) {
+    constructor(name, parent, children, source, parameterName, functionBody) {
         super(name, parent, children);
 
         this.source = null;
         this.setSource(source);
 
-        this.functionString = null;
-        this.transfer = function(datum) { return { }; };
-        this.setFunctionString(functionString);
+        this.parameterName = parameterName;
+        this.functionBody = functionBody;
+
+        this.guid = getWeakGuid();
+        this.messenger = new MessageAPIMaster();
     }
 
     /**
      * Return the ith item in the dataset, evaluating this lazily
      * where possible.
      * @param {int} index 
+     * @param {function} callback
      */
-    getItem(index) {
-        return this.transfer(this.source.getItem(index));
+    getItem(index, callback) {
+        self.source.getItem(index, function(sourceItem) {
+            getSandboxedFunctionMessenger().sendRequest({
+                requestType: "query",
+                datum: sourceItem
+            }, callback);
+        });
     }
 
     /**
      * Count the items that are direct descendents of this dataset,
      * not counting any that belong to its children.
+     * @param {function} callback
      */
-    countDirectItems() {
-        return this.source.countDirectItems();
+    countDirectItems(callback) {
+        this.source.countDirectItems(callback);
     }
 
     /**
@@ -65,11 +75,18 @@ class MappedDataset extends Dataset {
     }
 
     /**
-     * Sets the function string used as the transfer function.
-     * @param {string} newString 
+     * Sets the function parameter name and string to new values.
+     * @param {string} parameterName
+     * @param {string} functionBody
      */
-    setFunctionString(newString) {
-        this.functionString = newString;
-        this.transfer = new Function("x", this.functionString);
+    setFunction(parameterName, functionBody) {
+        this.parameterName = parameterName;
+        this.functionBody = functionBody;
+        getSandboxedFunctionMessenger().sendRequest({
+            requestType: "update",
+            guid: this.guid,
+            parameterName: this.parameterName,
+            functionBody: this.functionBody
+        }, function(result) { });
     }
 }

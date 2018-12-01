@@ -64,9 +64,13 @@ class SandboxFunction {
                 this.deleteFunction(data.guid);
                 return { success: true };
             case "query":
-                return this.query(data.guid, data.datum);
+                var result = this.query(data.guid, data.datum);
+                result.success = true;
+                return result;
             case "queryMany":
-                return this.queryMany(data.guid, data.data);
+                var result = this.queryMany(data.guid, data.data);
+                result.success = true;
+                return result;
             default:
                 console.error("Unrecognised response type.");
                 return { success: false };
