@@ -33,7 +33,7 @@ class MappedDataset extends Dataset {
     getItem(index, callback) {
         var self = this;
         self.source.getItem(index, function(sourceItem) {
-            getSandboxedFunctionMessenger().sendRequest({
+            self.messenger.sendRequest({
                 requestType: "query",
                 guid: self.guid,
                 datum: sourceItem
@@ -87,11 +87,67 @@ class MappedDataset extends Dataset {
         var self = this;
         self.parameterName = parameterName;
         self.functionBody = functionBody;
-        getSandboxedFunctionMessenger().sendRequest({
+        self.messenger.sendRequest({
             requestType: "update",
             guid: self.guid,
             parameterName: self.parameterName,
             functionBody: self.functionBody
         }, function(result) { });
     }
+
+    /**
+     * Kill the dataset, removing its sandboxed function to free
+     * up space.
+     */
+    kill() {
+        this.messenger.sendRequest({
+            requestType: "delete",
+            guid: this.guid
+        }, function(result) { });
+    }
+}
+
+/**
+ * Map a dataset, but not its children, to a new dataset according
+ * to some transfer function.
+ * @param {string} name 
+ * @param {Dataset} parent 
+ * @param {Dataset} source 
+ * @param {string} parameterName 
+ * @param {string} functionBody 
+ */
+function mappedDataset(name, parent, source, parameterName, functionBody) {
+    return recursivelyMappedDataset(name, parent, source, parameterName,
+        functionBody, 0);
+}
+
+/**
+ * Map a dataset, and its children up to the given depth, to a new
+ * dataset according to some transfer function.  To map all children
+ * regardless of depth, set `recursionDepth` to -1.
+ * @param {string} name 
+ * @param {Dataset} parent 
+ * @param {Dataset} source 
+ * @param {string} parameterName 
+ * @param {string} functionBody 
+ * @param {int} recursionDepth 
+ */
+function recursivelyMappedDataset(name, parent, source, parameterName,
+        functionBody, recursionDepth) {
+    var mappedChildren = [];
+    if (recursionDepth !== 0) {
+        for (var i = 0; i < source.children.length; i++) {
+            mappedChildren.push(recursivelyMappedDataset(
+                name + "-mapped-" + source.children[i].name,
+                null, source.children[i], parameterName, functionBody,
+                recursionDepth - 1));
+        }
+    }
+
+    var topLevel = new MappedDataset(name, parent, [], source,
+        parameterName, functionBody);    
+    for (var i = 0; i < mappedChildren.length; i++) {
+        mappedChildren[i].setParent(topLevel);
+    }
+    return topLevel;
 }
