@@ -1,15 +1,15 @@
 {
-    "name": "Mungo",
-    "description": "Provides a UI for quickly and easily performing data munging and visualisation.",
-    "version": "0.1",
-    "manifest_version": 2,
-    "app": {
-      "background": {
-        "scripts": ["scripts/background.js"]
-      }
-    },
-    "sandbox": {
-      "pages": []
-    },
-    "icons": { "16": "assets/placeholder-16.png", "128": "assets/placeholder-128.png" }
-  }
+  "name": "Mungo",
+  "description": "Provides a UI for quickly and easily performing data munging and visualisation.",
+  "version": "0.1",
+  "manifest_version": 2,
+  "app": {
+    "background": {
+      "scripts": ["scripts/background.js"]
+    }
+  },
+  "sandbox": {
+    "pages": []
+  },
+  "icons": { "16": "assets/placeholder-16.png", "128": "assets/placeholder-128.png" }
+}
