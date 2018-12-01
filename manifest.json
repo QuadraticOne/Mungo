@@ -9,7 +9,7 @@
       }
     },
     "sandbox": {
-      "pages": ["pages/sandbox.html"]
+      "pages": []
     },
     "icons": { "16": "assets/placeholder-16.png", "128": "assets/placeholder-128.png" }
   }
