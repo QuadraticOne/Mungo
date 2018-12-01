@@ -112,8 +112,8 @@ class Dataset {
      */
     countItems(callback) {
         var self = this;
-        getters = range(self.children.length).map(
-            cb => (i => self.children[i].countItems(cb)));
+        var getters = range(self.children.length).map(
+            i => (cb => self.children[i].countItems(cb)));
         getters.push(cb => self.countDirectItems(cb));
         new CallbackAccumulator(getters).execute(function(counts) {
             var sum = 0;
@@ -151,7 +151,7 @@ class Dataset {
         var self = this;
         self.countDirectItems(function(nDirectItems) {
             var directItemGetters = range(nDirectItems).map(
-                cb => (i => self.getItem(i, cb)));
+                i => (cb => self.getItem(i, cb)));
             new CallbackAccumulator(directItemGetters).execute(callback);
         });
     }
@@ -165,7 +165,7 @@ class Dataset {
     getChildItems(includeGrandchildren, callback) {
         var self = this;
         var childItemGetters = range(self.children.length).map(
-            cb => (i => self.children[i].getItems(includeGrandchildren, cb)));
+            i => (cb => self.children[i].getItems(includeGrandchildren, cb)));
         new CallbackAccumulator(childItemGetters).execute(
             results => callback(flatten(results)));
     }

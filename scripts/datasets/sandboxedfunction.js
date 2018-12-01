@@ -14,63 +14,73 @@ class SandboxedFunction {
      * Update the function referenced by the given GUID to have
      * a new parameter name and/or function body.  If no function
      * exists for that GUID, a new entry will be created.
+     * @param {SandboxedFunction} self
      * @param {string} guid 
      * @param {string} parameterName 
      * @param {string} functionBody 
      */
-    updateFunction(guid, parameterName, functionBody) {
-        this.functions[guid] = new Function(parameterName, functionBody);
+    updateFunction(self, guid, parameterName, functionBody) {
+        self.functions[guid] = new Function(parameterName, functionBody);
     }
 
     /**
      * Delete any function associated with the given GUID.
+     * @param {SandboxedFunction} self
      * @param {string} guid 
      */
-    deleteFunction(guid) {
-        delete this.functions[guid];
+    deleteFunction(self, guid) {
+        delete self.functions[guid];
     }
 
     /**
      * Return the response of the function, as specified by the
      * given GUID, when applied to the input data.
+     * @param {SandboxedFunction} self
      * @param {string} guid 
      * @param {object} datum
      */
-    query(guid, datum) {
-        return this.functions[guid](datum);
+    query(self, guid, datum) {
+        return self.functions[guid](datum);
     }
 
     /**
      * Return the response of the function, as specified by the
      * given GUID, when applied elementwise to each object in the
      * input list.
+     * @param {SandboxedFunction} self
      * @param {string} guid 
      * @param {[object]} data 
      */
-    massQuery(guid, data) {
-        return data.map(this.functions[guid]);
+    massQuery(self, guid, data) {
+        return data.map(self.functions[guid]);
     }
 
     /**
      * Return a response to the given request.
+     * @param {SandboxedFunction} self 
+     * @param {object} data 
      */
-    response(data) {
+    response(self, data) {
         switch (data.requestType) {
             case "update":
             case "create":
-                this.updateFunction(data.guid,
+                self.updateFunction(self, data.guid,
                     data.parameterName, data.functionBody);
                 return { success: true };
             case "delete":
-                this.deleteFunction(data.guid);
+                self.deleteFunction(self, data.guid);
                 return { success: true };
             case "query":
-                var result = this.query(data.guid, data.datum);
-                result.success = true;
+                var result = {
+                    content: self.query(self, data.guid, data.datum),
+                    success: true
+                }
                 return result;
             case "massQuery":
-                var result = this.massQuery(data.guid, data.data);
-                result.success = true;
+                var result = {
+                    content: self.massQuery(self, data.guid, data.data),
+                    success: true
+                };
                 return result;
             default:
                 console.error("Unrecognised response type.");
@@ -80,4 +90,5 @@ class SandboxedFunction {
 }
 
 sandboxedFunction = new SandboxedFunction();
-sandboxedFunctionSlave = new MessageAPISlave(sandboxedFunction.response);
+sandboxedFunctionSlave = new MessageAPISlave(
+    data => sandboxedFunction.response(sandboxedFunction, data));

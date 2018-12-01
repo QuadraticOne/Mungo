@@ -19,7 +19,9 @@ class MappedDataset extends Dataset {
         this.functionBody = functionBody;
 
         this.guid = getWeakGuid();
-        this.messenger = new MessageAPIMaster();
+        this.messenger = getSandboxedFunctionMessenger();
+
+        this.setFunction(this.parameterName, this.functionBody);
     }
 
     /**
@@ -29,11 +31,13 @@ class MappedDataset extends Dataset {
      * @param {function} callback
      */
     getItem(index, callback) {
+        var self = this;
         self.source.getItem(index, function(sourceItem) {
             getSandboxedFunctionMessenger().sendRequest({
                 requestType: "query",
+                guid: self.guid,
                 datum: sourceItem
-            }, callback);
+            }, result => callback(result.content));
         });
     }
 
@@ -80,13 +84,14 @@ class MappedDataset extends Dataset {
      * @param {string} functionBody
      */
     setFunction(parameterName, functionBody) {
-        this.parameterName = parameterName;
-        this.functionBody = functionBody;
+        var self = this;
+        self.parameterName = parameterName;
+        self.functionBody = functionBody;
         getSandboxedFunctionMessenger().sendRequest({
             requestType: "update",
-            guid: this.guid,
-            parameterName: this.parameterName,
-            functionBody: this.functionBody
+            guid: self.guid,
+            parameterName: self.parameterName,
+            functionBody: self.functionBody
         }, function(result) { });
     }
 }
