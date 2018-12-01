@@ -134,10 +134,12 @@ class Dataset {
     getItems(includeChildren, callback) {
         var self = this;
         if (self.children.length === 0 || !includeChildren) {
-            self.getDirectItems(callback);
+            self.getDirectItems(self, callback);
         } else {
-            new CallbackAccumulator([self.getDirectItems, self.getChildItems])
-                .execute(results => callback(flatten(results)));
+            new CallbackAccumulator([
+                cb => self.getDirectItems(self, cb),
+                cb => self.getChildItems(self, includeChildren, cb)
+            ]).execute(results => callback(flatten(results)));
         }
     }
 
@@ -145,10 +147,10 @@ class Dataset {
      * Get the items that belong directly to this dataset, as opposed to
      * one of its children, collate them into an array, and perform an
      * action on the results.
+     * @param {Dataset} self
      * @param {function} callback 
      */
-    getDirectItems(callback) {
-        var self = this;
+    getDirectItems(self, callback) {
         self.countDirectItems(function(nDirectItems) {
             var directItemGetters = range(nDirectItems).map(
                 i => (cb => self.getItem(i, cb)));
@@ -159,11 +161,11 @@ class Dataset {
     /**
      * Flatten the items of all children into one list and perform an
      * action on the result.
+     * @param {Dataset} self
      * @param {bool} includeGrandchildren
      * @param {function} callback 
      */
-    getChildItems(includeGrandchildren, callback) {
-        var self = this;
+    getChildItems(self, includeGrandchildren, callback) {
         var childItemGetters = range(self.children.length).map(
             i => (cb => self.children[i].getItems(includeGrandchildren, cb)));
         new CallbackAccumulator(childItemGetters).execute(
@@ -260,22 +262,27 @@ class CallbackAccumulator {
      */
     execute(callback) {
         var self = this;
-        this.receivedResults = 0;
+        self.receivedResults = 0;
 
-        this.results = [];
-        for (var i = 0; i < this.expectedResults; i++) {
-            this.results.push(null);
+        self.results = [];
+        for (var i = 0; i < self.expectedResults; i++) {
+            self.results.push(null);
         }
 
-        for (var i = 0; i < this.expectedResults; i++) {
-            this.getters[i](function(result) {
+        if (self.expectedResults === 0) {
+            callback(self.results);
+            return;
+        }
+
+        range(self.expectedResults).forEach(function(i) {
+            self.getters[i](function(result) {
                 self.results[i] = result;
                 self.receivedResults += 1;
                 if (self.receivedResults >= self.expectedResults) {
                     callback(self.results);
                 }
             });
-        }
+        })
     }
 }
 
