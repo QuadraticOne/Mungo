@@ -16,17 +16,19 @@ class LiteralDataset extends Dataset {
      * Return the ith item in the dataset, evaluating this lazily
      * where possible.
      * @param {int} index 
+     * @param {function} callback
      */
-    getItem(index) {
-        return this.items[index];
+    getItem(index, callback) {
+        callback(this.items[index]);
     }
 
     /**
      * Count the items that are direct descendents of this dataset,
      * not counting any that belong to its children.
+     * @param {function} callback
      */
-    countDirectItems() {
-        return this.items.length;
+    countDirectItems(callback) {
+        callback(this.items.length);
     }
 
     /**
