@@ -58,19 +58,22 @@ class Dataset {
     }
 
     /**
-     * Return the ith item in the dataset, evaluating this lazily
-     * where possible.
+     * Get the ith item in the dataset, evaluating this lazily
+     * where possible, and perform some action with the result.
      * @param {int} index 
+     * @param {function} callback
      */
-    getItem(index) {
+    getItem(index, callback) {
         console.error("Dataset.getItem not implemented.");
     }
 
     /**
      * Count the items that are direct descendents of this dataset,
-     * not counting any that belong to its children.
+     * not counting any that belong to its children, and perform
+     * some action with the result.
+     * @param {function} callback
      */
-    countDirectItems() {
+    countDirectItems(callback) {
         console.error("Dataset.countItems not implemented.");
     }
 
@@ -103,33 +106,68 @@ class Dataset {
     }
 
     /**
-     * Return the number of items belonging to this dataset and its
-     * children.
+     * Count the items belonging to this dataset and its children and
+     * then perform some action with the result.
+     * @param {function} callback
      */
-    countItems() {
-        var total = countDirectItems();
-        for (var i = 0; i < this.children.length; i++) {
-            total += this.children[i].countItems();
-        }
-        return total;
+    countItems(callback) {
+        var self = this;
+        getters = range(this.children.length).map(
+            cb => (i => self.children[i].countItems(cb)));
+        getters.push(cb => self.countDirectItems(cb));
+        new CallbackAccumulator(getters).execute(function(counts) {
+            var sum = 0;
+            for (var i = 0; i < counts.length; i++) {
+                sum += counts[i];
+            }
+            callback(sum);
+        });
     }
 
     /**
-     * Return all items belonging directly to the dataset and, optionally,
-     * to its children as well.
+     * Retrieve all items belonging directly to the dataset and, optionally,
+     * to its children as well, collate them into a single array, and then
+     * perform an action on the result.
      * @param {bool} includeChildren
+     * @param {function} callback
      */
-    getItems(includeChildren) {
-        var output = [];
-        for (var i = 0; i < this.countDirectItems(); i++) {
-            output.push(this.getItem(i));
+    getItems(includeChildren, callback) {
+        var self = this;
+        if (self.children.length === 0 || !includeChildren) {
+            self.getDirectItems(callback);
+        } else {
+            new CallbackAccumulator([self.getDirectItems, self.getChildItems])
+                .execute(results => callback(flatten(results)));
         }
-        if (includeChildren) {
-            for (var i = 0; i < this.children.length; i++) {
-                output = output.concat(this.children[i].items(includeChildren));
-            }
-        } 
-        return output;
+    }
+
+    /**
+     * Get the items that belong directly to this dataset, as opposed to
+     * one of its children, collate them into an array, and perform an
+     * action on the results.
+     * @param {function} callback 
+     */
+    getDirectItems(callback) {
+        var self = this;
+        self.countDirectItems(function(nDirectItems) {
+            var directItemGetters = range(nDirectItems).map(
+                cb => (i => self.getItem(i, cb)));
+            new CallbackAccumulator(directItemGetters).execute(callback);
+        });
+    }
+    
+    /**
+     * Flatten the items of all children into one list and perform an
+     * action on the result.
+     * @param {bool} includeGrandchildren
+     * @param {function} callback 
+     */
+    getChildItems(includeGrandchildren, callback) {
+        var self = this;
+        var childItemGetters = range(self.children.length).map(
+            cb => (i => self.children[i].getItems(includeGrandchildren, cb)));
+        new CallbackAccumulator(childItemGetters).execute(
+            results => callback(flatten(results)));
     }
 
     /**
@@ -197,4 +235,72 @@ class Dataset {
         predecessor.removeSuccessor(successor);
         successor.removePredecessor(predecessor);
     }
+}
+
+class CallbackAccumulator {
+    /**
+     * Accumulate into a single array the results from a number of
+     * functions which, when given a function as their sole argument,
+     * will call that function after retrieving a result.
+     * @param {[function]} getters
+     */
+    constructor(getters) {
+        this.getters = getters;
+
+        this.expectedResults = this.getters.length;
+        this.results = [];
+        this.receivedResults = 0;
+    }
+
+    /**
+     * Accumulate the results of all the getters and, once all
+     * of them have returned their results, call a callback upon
+     * the accumulated array.
+     * @param {function} callback 
+     */
+    execute(callback) {
+        var self = this;
+        this.receivedResults = 0;
+
+        this.results = [];
+        for (var i = 0; i < this.expectedResults; i++) {
+            this.results.push(null);
+        }
+
+        for (var i = 0; i < this.expectedResults; i++) {
+            this.getters[i](function(result) {
+                self.results[i] = result;
+                self.receivedResults += 1;
+                if (self.receivedResults >= self.expectedResults) {
+                    callback(self.results);
+                }
+            });
+        }
+    }
+}
+
+/**
+ * Return a list of all numbers, starting from 0 and ending before
+ * n (exclusive).
+ * @param {int} n 
+ */
+function range(n) {
+    output = [];
+    for (var i = 0; i < n; i++) {
+        output.push(i);
+    }
+    return output;
+}
+
+/**
+ * Flatten a two-dimensional array of objects into a one-dimensional
+ * array.
+ * @param {[[object]]} ls 
+ */
+function flatten(ls) {
+    var output = [];
+    for (var i = 0; i < ls.length; i++) {
+        output = output.concat(ls[i]);
+    }
+    return output;
 }
