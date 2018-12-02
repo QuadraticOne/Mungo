@@ -5,26 +5,23 @@ class FilteredDataset extends Dataset {
      * @param {string} name 
      * @param {Dataset} parent 
      * @param {[Dataset]} children 
-     * @param {Dataset} source 
-     * @param {string} parameterName 
-     * @param {string} predicateBody 
+     * @param {Dataset} source
+     * @param {string} guid
      */
-    constructor(name, parent, children, source, parameterName, predicateBody) {
+    constructor(name, parent, children, source, guid) {
         super(name, parent, children);
 
         this.source = null;
         this.setSource(source);
 
-        this.parameterName = parameterName;
-        this.predicateBody = predicateBody;
+        this.parameterName = "d";
+        this.predicateBody = "return true;";
 
-        this.guid = getWeakGuid();
+        this.guid = guid;
         this.messenger = getSandboxedFunctionMessenger();
 
         this.includedIndices = [];
         this.nextIndex = 0;
-
-        this.setPredicate(this.parameterName, this.predicateBody);
     }
 
     /**
@@ -60,10 +57,7 @@ class FilteredDataset extends Dataset {
      * @param {Dataset} predecessor 
      */
     predecessorUpdated(predecessor) {
-        if (predecessor === this.source) {
-            this.includedIndices = [];
-            this.nextIndex = 0;
-        }
+        this.updated();
     }
 
     /**
@@ -194,23 +188,28 @@ function filteredDataset(name, parent, source, parameterName, predicateBody) {
  * @param {string} parameterName 
  * @param {string} predicateBody 
  * @param {int} recursionDepth 
+ * @param {string?} guid
  */
 function recursivelyFilteredDataset(name, parent, source, parameterName,
-        predicateBody, recursionDepth) {
+        predicateBody, recursionDepth, guid = null) {
+    var datasetGuid = guid === null ? getWeakGuid() : guid;
     var filteredChildren = [];
     if (recursionDepth !== 0) {
         for (var i = 0; i < source.children.length; i++) {
             filteredChildren.push(recursivelyFilteredDataset(
                 name + "-filtered-" + source.children[i].name,
                 null, source.children[i], parameterName, predicateBody,
-                recursionDepth - 1));
+                recursionDepth - 1, datasetGuid));
         }
     }
 
-    var topLevel = new FilteredDataset(name, parent, [], source,
-        parameterName, predicateBody);    
+    var topLevel = new FilteredDataset(name, parent, [], source, datasetGuid);
+    topLevel.setPredicate(parameterName, predicateBody);    
     for (var i = 0; i < filteredChildren.length; i++) {
         filteredChildren[i].setParent(topLevel);
+        // Children are also dependent on the parent because they
+        // are using the same predicate
+        Dataset.createDependency(topLevel, filteredChildren[i]);
     }
     return topLevel;
 }

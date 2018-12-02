@@ -6,22 +6,19 @@ class MappedDataset extends Dataset {
      * @param {Dataset} parent 
      * @param {[Dataset]} children 
      * @param {Dataset} source 
-     * @param {string} parameterName
-     * @param {string} functionBody 
+     * @param {string} guid
      */
-    constructor(name, parent, children, source, parameterName, functionBody) {
+    constructor(name, parent, children, source, guid) {
         super(name, parent, children);
 
         this.source = null;
         this.setSource(source);
 
-        this.parameterName = parameterName;
-        this.functionBody = functionBody;
+        this.parameterName = "x";
+        this.functionBody = "return x;";
 
-        this.guid = getWeakGuid();
+        this.guid = guid;
         this.messenger = getSandboxedFunctionMessenger();
-
-        this.setFunction(this.parameterName, this.functionBody);
     }
 
     /**
@@ -93,6 +90,7 @@ class MappedDataset extends Dataset {
             parameterName: self.parameterName,
             functionBody: self.functionBody
         }, function(result) { });
+        self.updated();
     }
 
     /**
@@ -131,23 +129,28 @@ function mappedDataset(name, parent, source, parameterName, functionBody) {
  * @param {string} parameterName 
  * @param {string} functionBody 
  * @param {int} recursionDepth 
+ * @param {string?} guid
  */
 function recursivelyMappedDataset(name, parent, source, parameterName,
-        functionBody, recursionDepth) {
+        functionBody, recursionDepth, guid = null) {
+    var datasetGuid = guid === null ? getWeakGuid() : guid;
     var mappedChildren = [];
     if (recursionDepth !== 0) {
         for (var i = 0; i < source.children.length; i++) {
             mappedChildren.push(recursivelyMappedDataset(
                 name + "-mapped-" + source.children[i].name,
                 null, source.children[i], parameterName, functionBody,
-                recursionDepth - 1));
+                recursionDepth - 1, datasetGuid));
         }
     }
 
-    var topLevel = new MappedDataset(name, parent, [], source,
-        parameterName, functionBody);    
+    var topLevel = new MappedDataset(name, parent, [], source, datasetGuid);
+    topLevel.setFunction(parameterName, functionBody);
     for (var i = 0; i < mappedChildren.length; i++) {
         mappedChildren[i].setParent(topLevel);
+        // Children are also dependent on the parent because they
+        // are using the same function
+        Dataset.createDependency(topLevel, mappedChildren[i]);
     }
     return topLevel;
 }
