@@ -1,9 +1,14 @@
 window.onload = setup;
 
+var mungo = {
+    builderTypes: { }
+};
+
 var sandboxedFunctionMessenger = null;
 
 function setup() {
     setupSandboxedFunctionMessenger();
+    setupDatasets();
 }
 
 function addClickMethod(elementId, callback) {
@@ -18,4 +23,8 @@ function setupSandboxedFunctionMessenger() {
 
 function getSandboxedFunctionMessenger() {
     return sandboxedFunctionMessenger;
+}
+
+function setupDatasets() {
+    mungo.datasetContainer = document.getElementById("datasetContainer");
 }
