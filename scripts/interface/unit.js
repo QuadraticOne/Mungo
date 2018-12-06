@@ -9,7 +9,7 @@ class InterfaceUnit {
         this.data = data;
         this.parentElement = parentElement;
         this.element = this.create();
-        this.parentElement.appendChild(this.element);
+        this.addToDocument();
     }
 
     /**
@@ -21,25 +21,33 @@ class InterfaceUnit {
     }
 
     /**
-     * Destroy this interface unit, removing it from the document.
+     * Add the HTML element enclosing the visual representation of the
+     * data structure to the parent element.
      */
-    destroy() {
-        this.parentElement.removeChild(this.element);
-        this.element = null;
+    addToDocument() {
+        this.parentElement.appendChild(this.element);
     }
 
     /**
-     * Get the data object for this unit.  This will automatically
-     * check for any updates.
+     * Destroy this interface unit, removing it from the document.
+     */
+    removeFromDocument() {
+        this.parentElement.removeChild(this.element);
+    }
+
+    /**
+     * Get the data object for this unit.  This should be overridden
+     * if the data must be refreshed after user changes.
      */
     getData() {
-        this.refreshData();
         return this.data;
     }
 
     /**
-     * Refresh this interface unit's data field, updating any members that
-     * may have been modified by the user.
+     * Apply any changes to the interface's data as described
+     * by the object.  Fields which are left out are assumed not
+     * to have changed.
+     * @param {object} newData 
      */
-    refreshData() { }
+    applyDataChanges(changes) { }
 }
