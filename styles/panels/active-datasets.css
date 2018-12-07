@@ -12,3 +12,41 @@ h1 {
     color: #E8EEF2;
     font-family: 'Gill Sans', 'Gill Sans MT', 'Calibri', 'Trebuchet MS', sans-serif;
 }
+
+.datasetSummaryContainerParent {
+    background-color: #E8EEF2;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+.datasetSummaryContainerParent:hover {
+    background-color: #74B3CE;
+}
+
+.datasetSummaryContainerChild {
+
+}
+
+.datasetSummaryNameParent {
+    font-size: 120%;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.datasetSummaryNameChild {
+
+}
+
+.datasetSummaryItemCount {
+    
+}
+
+.datasetSummaryTextBar {
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.horizontalGroup {
+    display: flex;
+}

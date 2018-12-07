@@ -11,6 +11,7 @@ function setup() {
     setupSandboxedFunctionMessenger();
     setupDatasets();
     setupWindow();
+    setupDebugging();
 }
 
 function addClickMethod(elementId, callback) {
@@ -36,4 +37,13 @@ function setupWindow() {
     var window = document.getElementById("window");
     window.style.width = (screen.width).toString() + "px";
     window.style.height = (screen.height - taskbarHeight).toString() + "px";
+}
+
+function setupDebugging() {
+    dsp = new LiteralDataset("Parent", null, [], range(10));
+    dsc = new LiteralDataset("Child", null, [], range(15));
+    dsc.setParent(dsp);
+
+    dsp.getSummaryData(dsp,
+        result => interfaceUnit(result, mungo.panels.activeDatasets));
 }

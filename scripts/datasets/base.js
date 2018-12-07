@@ -129,10 +129,10 @@ class Dataset {
      * @param {function} callback 
      */
     getSummaryData(self, callback) {
-        console.log(self);
         var data = {
             type: "datasetSummary",
-            name: self.fullName(),
+            fullName: self.fullName(),
+            name: self.name,
             generation: self.generation(),
             itemCount: null,
             children: null,
