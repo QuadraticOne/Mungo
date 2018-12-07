@@ -1,7 +1,8 @@
 window.onload = setup;
 
 var mungo = {
-    builderTypes: { }
+    builderTypes: { },
+    panels: { }
 };
 
 var sandboxedFunctionMessenger = null;
@@ -9,6 +10,7 @@ var sandboxedFunctionMessenger = null;
 function setup() {
     setupSandboxedFunctionMessenger();
     setupDatasets();
+    setupWindow();
 }
 
 function addClickMethod(elementId, callback) {
@@ -26,5 +28,12 @@ function getSandboxedFunctionMessenger() {
 }
 
 function setupDatasets() {
-    mungo.datasetContainer = document.getElementById("datasetContainer");
+    mungo.panels.activeDatasets = document.getElementById("activeDatasets");
+}
+
+function setupWindow() {
+    var taskbarHeight = 48;
+    var window = document.getElementById("window");
+    window.style.width = (screen.width).toString() + "px";
+    window.style.height = (screen.height - taskbarHeight).toString() + "px";
 }

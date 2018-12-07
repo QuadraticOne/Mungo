@@ -1,7 +1,44 @@
+.mungoPanel {
+    position: absolute;
+    margin: 0px;
+    left: 0%;
+    top: 0%;
+}
+
 .pageBackground {
     background-color: #225363;
+    margin: 0px;
 }
 
 #sandbox {
     display: none;
+}
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #E8EEF2;
+    margin: 1em 0;
+    padding: 0;
+}
+
+colourA {
+    background-color: #273D45;
+}
+
+colourB {
+    background-color: #225363;
+}
+
+colourC {
+    background-color: #74B3CE;
+}
+
+colourD {
+    background-color: #508991;
+}
+
+colourE {
+    background-color: #E8EEF2;
 }
