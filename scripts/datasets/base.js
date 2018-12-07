@@ -30,6 +30,14 @@ class Dataset {
         }
     }
 
+    fullName() {
+        if (this.parent === null) {
+            return this.name;
+        } else {
+            return this.parent.fullName() + "/" + this.name;
+        }
+    }
+
     /**
      * Remove the parent dataset from this dataset, and also remove this
      * dataset from the parent's list of children.  Will not cause an
@@ -91,6 +99,64 @@ class Dataset {
      */
     selfUpdated() {
         console.error("Dataset.selfUpdated not implemented.");
+    }
+
+    /**
+     * Retrieve the user-editable properties of this dataset which are not
+     * common to all dataset types, and perform an action upon the result.
+     * @param {Dataset} self 
+     * @param {function} callback 
+     */
+    getTransferData(self, callback) {
+        console.error("Dataset.getTransferData not implemented.");
+    }
+
+    /**
+     * Apply the changes to this dataset's transfer data as described in the
+     * provided object.  Fields whose values have not changed may be left
+     * out.
+     * @param {object} data 
+     */
+    applyUpdatedTransferData(data) {
+        console.error("Dataset.applyUpdatedTransferData not implemented.");
+    }
+
+    /**
+     * Retrieve data relating to the properties of this dataset that are common
+     * to all datasets (name, children, generation, number of items), and then
+     * perform an action on the result.
+     * @param {Dataset} self 
+     * @param {function} callback 
+     */
+    getSummaryData(self, callback) {
+        console.log(self);
+        var data = {
+            type: "datasetSummary",
+            name: self.fullName(),
+            generation: self.generation(),
+            itemCount: null,
+            children: null,
+            predecessorNames: self.predecessors.map(d => d.fullName()),
+            successorNames: self.successors.map(d => d.fullName())
+        };
+        var getters = self.children.map(c => (cb => c.getSummaryData(c, cb)));
+        new CallbackAccumulator(getters).execute(function (result) {
+            data.children = result;
+            self.countItems(function (itemCount) {
+                data.itemCount = itemCount;
+                callback(data);
+            });
+        });
+    }
+
+    /**
+     * Update the dataset's summary fields with any changes contained in the
+     * data object.
+     * @param {object} data 
+     * @param {DatasetController} datasetController 
+     */
+    applyUpdatedSummaryData(data, datasetController) {
+        console.error("Dataset.applyUpdatedSummaryData not implemented.");
     }
 
     /**
@@ -243,7 +309,8 @@ class CallbackAccumulator {
     /**
      * Accumulate into a single array the results from a number of
      * functions which, when given a function as their sole argument,
-     * will call that function after retrieving a result.
+     * will call that function after retrieving a result, passing
+     * that result to the inner function as an argument.
      * @param {[function]} getters
      */
     constructor(getters) {
